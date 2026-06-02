@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS - Faculty Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="card">
+    <h2>Faculty Login</h2>
+    <p>Manage your class attendance and QR sessions</p>
+    {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="/faculty_login">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+            <label>Username</label>
+            <input name="username" placeholder="your.username" required>
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <div class="password-wrap">
+                <input type="checkbox" id="toggle-faculty" class="toggle-checkbox">
+                <input name="password" type="text" placeholder="••••••••" required>
+                <label for="toggle-faculty" class="toggle-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path class="eye-on" stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.399 8.049 7.21 5 12 5c4.789 0 8.601 3.049 9.964 6.678.07.234.07.484 0 .718-1.363 3.629-5.175 6.678-9.964 6.678-4.79 0-8.601-3.049-9.964-6.678z" />
+                        <path class="eye-on" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path class="eye-off" stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.228-2.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                </label>
+            </div>
+        </div>
+        <button class="btn-indigo">Sign in</button>
+    </form>
+    <div style="text-align:center; margin-top:.8rem;">
+        <a href="/forgot_password/faculty"
+           style="font-size:13px; color:#4f46e5; text-decoration:none;">
+            Forgot password?
+        </a>
+    </div>
+    <a href="/">← Back to Home</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS - Faculty Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="dashboard-body">
+
+    <div class="topbar">
+        <span>{{ faculty_name }} &nbsp;|&nbsp; <a href="/logout">Logout</a></span>
+    </div>
+
+    <div class="dash-wrap">
+        <div class="sidebar">
+            <a href="/faculty_dashboard" class="sidebar-item active">Dashboard</a>
+            <a href="/logout" class="sidebar-item logout-link">Logout</a>
+        </div>
+
+        <div class="main">
+            <div class="page-title">Faculty Dashboard</div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Present Today</div>
+                    <div class="stat-val">{{ present_count }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Absent Today</div>
+                    <div class="stat-val">{{ absent_count }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-val">{{ total_students }}</div>
+                </div>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="section-card">
+                <h3>QR Code Session</h3>
+
+                {% if qr_active %}
+                <!-- Active QR -->
+                <div class="qr-active-wrap">
+                    <div class="qr-left">
+                        <img src="/qr_image/{{ faculty_user }}" alt="QR Code" class="qr-img" id="live-qr">
+                        <div style="text-align:center; margin-top:8px;">
+                            <span
+                                style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#6366f1;background:rgba(99,102,241,0.1);padding:3px 10px;border-radius:20px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                                Anti-proxy: QR refreshes every {{ qr_rotate_interval }}s
+                            </span>
+                        </div>
+                    </div>
+                    <div class="qr-right">
+                        <div class="qr-status-badge">● Session Active</div>
+                        <div style="font-size:14px; font-weight:600; color:#1a1a2e; margin-bottom:10px">
+                            Course: {{ qr_course }}
+                        </div>
+                        <div class="timer-label">Time Remaining</div>
+                        <div class="timer-display" id="timer">--:--</div>
+                        <div class="timer-bar-wrap">
+                            <div class="timer-bar" id="timer-bar"></div>
+                        </div>
+                        <p class="qr-hint">Students must scan the <b>live QR</b> — screenshots won't work!</p>
+
+                        <div
+                            style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:14px;">
+                            <div style="font-size:12px;font-weight:600;color:#166534;margin-bottom:4px;">🛡️ Anti-Proxy
+                                Protection Active</div>
+                            <ul style="font-size:11px;color:#15803d;margin:0;padding-left:16px;line-height:1.6;">
+                                <li>QR token rotates every {{ qr_rotate_interval }} seconds</li>
+                                <li>Device fingerprinting enabled</li>
+                                <li>Location tracking enabled</li>
+                            </ul>
+                        </div>
+
+                        <!-- Regenerate form -->
+                        <form method="POST" action="/generate_qr" class="regen-form">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="course_id" value="{{ qr_course }}">
+                            <div class="minutes-row">
+                                <label>Extend / Regenerate:</label>
+                                <select name="minutes" class="minutes-select">
+                                    <option value="1">1 min</option>
+                                    <option value="2">2 min</option>
+                                    <option value="3">3 min</option>
+                                    <option value="5" selected>5 min</option>
+                                    <option value="10">10 min</option>
+                                    <option value="15">15 min</option>
+                                    <option value="20">20 min</option>
+                                    <option value="30">30 min</option>
+                                    <option value="45">45 min</option>
+                                    <option value="60">60 min</option>
+                                </select>
+                                <button class="btn-indigo" style="width:auto;padding:8px 18px">
+                                    Regenerate
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- No active QR -->
+                <p style="color:#777;font-size:14px;margin-bottom:1.25rem">
+                    Generate a QR code for students to scan and mark their attendance.
+                    Set how long the session should stay active.
+                </p>
+                <form method="POST" action="/generate_qr">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <div class="field">
+                        <label>Select Course</label>
+                        <select name="course_id" class="minutes-select" style="width:100%" required>
+                            <option value="" disabled selected>-- Select Course --</option>
+                            {% for c in courses_list %}
+                            <option value="{{ c[1] }}">{{ c[1] }} - {{ c[2] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="minutes-row">
+                        <label>Session Duration:</label>
+                        <select name="minutes" class="minutes-select">
+                            <option value="1">1 min</option>
+                            <option value="2">2 min</option>
+                            <option value="3">3 min</option>
+                            <option value="5" selected>5 min</option>
+                            <option value="10">10 min</option>
+                            <option value="15">15 min</option>
+                            <option value="20">20 min</option>
+                            <option value="30">30 min</option>
+                            <option value="45">45 min</option>
+                            <option value="60">60 min</option>
+                        </select>
+                        <button class="btn-indigo" style="width:auto;padding:10px 24px">
+                            Generate QR Code
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+
+            <!-- Today's Attendance -->
+            <div class="section-card">
+                <h3>Today's Attendance</h3>
+                <div id="attendance-socket-status" class="socket-status" data-state="connecting">
+                    Connecting live updates...
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Roll</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-body">
+                        {% for row in today_attendance %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>
+                                <span class="badge
+                                {% if row[3] == 'Present' %}badge-green
+                                {% elif row[3] == 'Late' %}badge-amber
+                                {% else %}badge-red{% endif %}">
+                                    {{ row[3] }}
+                                </span>
+                            </td>
+                            <td>{{ row[4].strftime('%I:%M %p') if row[4] else '—' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="empty">No attendance marked yet today</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        @keyframes flash {
+            0% {
+                background-color: #d1fae5;
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+    </style>
+    <script>
+        // countdown timer
+        {% if qr_active %}
+        var remaining = {{ qr_remaining }};
+        var rotateInterval = {{ qr_rotate_interval }};
+        {% else %}
+        var remaining = 0;
+        var rotateInterval = 3600;
+        {% endif %}
+        var facultyUser = {{ faculty_user|tojson }};
+        var totalSecs = remaining;
+        var timerEl = document.getElementById('timer');
+        var barEl = document.getElementById('timer-bar');
+
+        function updateTimer() {
+            if (!timerEl) return;
+            if (remaining <= 0) {
+                timerEl.textContent = '00:00';
+                timerEl.style.color = '#E24B4A';
+                if (barEl) barEl.style.width = '0%';
+                // reload page when expired
+                setTimeout(function () { location.reload(); }, 1000);
+                return;
+            }
+            var mins = Math.floor(remaining / 60);
+            var secs = remaining % 60;
+            timerEl.textContent =
+                String(mins).padStart(2, '0') + ':' +
+                String(secs).padStart(2, '0');
+
+            // color changes
+            if (remaining <= 60) {
+                timerEl.style.color = '#E24B4A';
+            } else if (remaining <= 120) {
+                timerEl.style.color = '#BA7517';
+            } else {
+                timerEl.style.color = '#0F6E56';
+            }
+
+            // progress bar
+            if (barEl && totalSecs > 0) {
+                var pct = (remaining / totalSecs) * 100;
+                barEl.style.width = pct + '%';
+                if (remaining <= 60) {
+                    barEl.style.background = '#E24B4A';
+                } else if (remaining <= 120) {
+                    barEl.style.background = '#BA7517';
+                } else {
+                    barEl.style.background = '#0F6E56';
+                }
+            }
+
+            remaining--;
+            setTimeout(updateTimer, 1000);
+        }
+
+        if (remaining > 0) {
+            updateTimer();
+        }
+
+        // ── Auto-refresh the QR image every rotateInterval seconds ──
+        var qrImg = document.getElementById('live-qr');
+        if (qrImg && remaining > 0) {
+            setInterval(function () {
+                // Append timestamp to bust cache
+                qrImg.src = '/qr_image/' + encodeURIComponent(facultyUser) + '?t=' + Date.now();
+            }, rotateInterval * 1000);
+        }
+    </script>
+    <script>
+        window.AMS_ATTENDANCE_SOCKET = {
+            facultyUser: {{ faculty_user|tojson }},
+            tableBodySelector: "#attendance-body",
+            statusSelector: "#attendance-socket-status",
+            statSelector: ".stat-val",
+            socketUrl: {{ socketio_url|default('', true)|tojson }}
+        };
+    </script>
+    <script src="/static/attendance-socket-client.js"></script>
+
+</body>
+
+</html>

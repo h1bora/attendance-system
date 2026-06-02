@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS - Mark Attendance</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="card">
+    <h2>Mark Attendance</h2>
+    {% if course_id %}
+    <p>Marking attendance for: <strong style="color:var(--primary)">{{ course_id }}</strong></p>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+        <div class="alert alert-success">{{ success }}</div>
+    {% endif %}
+
+    {% if token and token != 'None' and not success %}
+    {% if not error or 'already' in error or 'Invalid' in error %}
+    <!-- Live session timer for student -->
+    <div class="session-timer" id="session-box">
+        <span class="session-dot" id="session-dot">●</span>
+        <span id="session-label">Session active — </span>
+        <span id="session-timer" style="font-weight:600">--:--</span>
+        <span> remaining</span>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/mark_attendance" id="attendance-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <!-- Session Token -->
+        <input type="hidden" name="token" value="{{ token }}">
+        <!-- Geolocation (captured by JS) -->
+        <input type="hidden" name="latitude" id="geo-lat" value="">
+        <input type="hidden" name="longitude" id="geo-lng" value="">
+
+        <div class="field">
+            <label>Roll Number</label>
+            <input name="roll" placeholder="e.g. CS2201" required>
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <div class="password-wrap">
+                <input type="checkbox" id="toggle-student" class="toggle-checkbox">
+                <input name="password" type="text" placeholder="••••••••" required>
+                <label for="toggle-student" class="toggle-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path class="eye-on" stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.399 8.049 7.21 5 12 5c4.789 0 8.601 3.049 9.964 6.678.07.234.07.484 0 .718-1.363 3.629-5.175 6.678-9.964 6.678-4.79 0-8.601-3.049-9.964-6.678z" />
+                        <path class="eye-on" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path class="eye-off" stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.228-2.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                </label>
+            </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#eff6ff,#eef2ff);border:1px solid #c7d2fe;border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span style="font-size:11px;color:#4338ca;line-height:1.4;">Anti-proxy protection active. Your device fingerprint and location are recorded.</span>
+        </div>
+
+        <button class="btn-teal" id="submit-btn">Verify &amp; Mark Attendance</button>
+    </form>
+    {% endif %}
+    <div class="or-row">OR</div>
+    <a href="/student_signup" style="margin-top:0">New Student? Create Account</a>
+    <br>
+    <a href="/forgot_password/student"
+       style="font-size:13px; color:#4f46e5; text-decoration:none; display:block; text-align:center; margin-top:.5rem;">
+        Forgot your password?
+    </a>
+    <br>
+    <a href="/">← Back to Home</a>
+</div>
+
+    {% if token and token != 'None' and not success %}
+    <script>
+        // ── Capture geolocation silently ──
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                document.getElementById('geo-lat').value = pos.coords.latitude;
+                document.getElementById('geo-lng').value = pos.coords.longitude;
+            }, function() {
+                // Silently continue if denied — fingerprint still works
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        }
+
+        function fetchAndUpdate() {
+            fetch('/qr_status?token={{ token }}')
+                .then(r => r.json())
+                .then(data => {
+                    var box    = document.getElementById('session-box');
+                    var dot    = document.getElementById('session-dot');
+                    var label  = document.getElementById('session-label');
+                    var timer  = document.getElementById('session-timer');
+                    var btn    = document.getElementById('submit-btn');
+
+                    if (!box) return;
+
+                    if (data.active) {
+                        var r    = data.remaining;
+                        var mins = Math.floor(r / 60);
+                        var secs = r % 60;
+                        timer.textContent =
+                            String(mins).padStart(2, '0') + ':' +
+                            String(secs).padStart(2, '0');
+
+                        if (r <= 60) {
+                            dot.style.color   = '#E24B4A';
+                            timer.style.color = '#E24B4A';
+                            label.textContent = 'Session expiring — ';
+                        } else {
+                            dot.style.color   = '#0F6E56';
+                            timer.style.color = '#0F6E56';
+                            label.textContent = 'Session active — ';
+                        }
+                        box.style.display = 'flex';
+                        if (btn) btn.disabled = false;
+                    } else {
+                        box.innerHTML =
+                            '<span style="color:#E24B4A">● Session expired. Ask faculty to regenerate QR.</span>';
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.style.opacity = '0.5';
+                            btn.style.cursor  = 'not-allowed';
+                        }
+                    }
+                });
+        }
+
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, 3000);
+    </script>
+    {% endif %}
+
+</body>
+</html>

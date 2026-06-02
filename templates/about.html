@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMS - About</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .about-card {
+            max-width: 600px;
+            padding: 3rem;
+            text-align: center;
+        }
+        .about-card h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #488ed3;
+        }
+        .about-section {
+            margin-bottom: 2rem;
+        }
+        .about-section h3 {
+            font-size: 1.2rem;
+            color: #38bdf8;
+            margin-bottom: 0.5rem;
+            font-family: 'Times New Roman', Times, serif;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.5rem;
+        }
+        .about-section p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .feature-list li {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .feature-list li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .dev-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card about-card">
+        <h2>About AMS</h2>
+        
+        <div class="about-section">
+            <h3>Overview</h3>
+            <p>The Attendance Management System (AMS) is a modern, responsive web application designed to streamline the process of taking and managing student attendance using dynamic QR codes.</p>
+        </div>
+
+        <div class="about-section">
+            <h3>Key Features</h3>
+            <ul class="feature-list">
+                <li>Role-based access control (Admin, Faculty, Student)</li>
+                <li>Dynamic, time-limited QR code generation for secure attendance</li>
+                <li>Real-time attendance tracking and dashboard analytics</li>
+                <li>Secure password hashing and recovery workflows</li>
+                <li>Responsive glassmorphism UI design</li>
+            </ul>
+        </div>
+
+        <div class="about-section">
+            <h3>Technology Stack</h3>
+            <div style="margin-top: 1rem;">
+                <span class="dev-badge">Python (Flask)</span>
+                <span class="dev-badge">MySQL</span>
+                <span class="dev-badge">HTML5 / Vanilla CSS</span>
+                <span class="dev-badge">Werkzeug Security</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/" class="btn-outline" style="text-decoration: none; display: inline-block; width: auto; padding: 10px 24px;">← Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
