@@ -1,0 +1,19 @@
+Flask==3.0.3
+Flask-MySQLdb==2.0.0
+mysqlclient==2.2.7
+Werkzeug==3.0.3
+qrcode==7.4.2
+pillow==10.4.0
+Flask-SocketIO==5.3.6
+eventlet==0.33.3
+Flask-Limiter==3.8.0
+python-dotenv==1.0.1
+# Optional — only needed if you use face recognition features
+# face-recognition==1.3.0
+# opencv-python==4.13.0.92
+# numpy==1.24.4
+
+# Optional — only needed for Excel export
+# pandas==1.5.3
+# openpyxl==3.1.2
+Flask-Mail
